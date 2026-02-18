@@ -1,10 +1,12 @@
 import streamlit as st
 from twilio.rest import Client
 from datetime import datetime
+import os
 
 # --- CONFIGURATION & WHATSAPP LOGIC ---
 def send_whatsapp_notification(name, mobile, category, description):
     try:
+        # Fetching secrets
         account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
         auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
         from_whatsapp = st.secrets["TWILIO_WHATSAPP_FROM"]
@@ -13,13 +15,18 @@ def send_whatsapp_notification(name, mobile, category, description):
         client = Client(account_sid, auth_token)
         
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Professional WhatsApp Message Body
         message_body = (
-            f"🚨 *طلب دعم جديد من عزاز البنا للخرسانة الجاهزة*\n\n"
-            f"*الاسم:* {name}\n"
-            f"*الجوال:* {mobile}\n"
-            f"*النوع:* {category}\n"
-            f"*الوصف:* {description}\n\n"
-            f"*الوقت:* {timestamp}"
+            f"🏗️ *مصنع عزاز البناء للخرسانة الجاهزة*\n"
+            f"----------------------------------\n"
+            f"🔔 *إشعار تذكرة دعم جديدة*\n\n"
+            f"*👤 العميل:* {name}\n"
+            f"*📞 الجوال:* {mobile}\n"
+            f"*📂 النوع:* {category}\n"
+            f"*📝 الوصف:* {description}\n\n"
+            f"🗓️ *التاريخ:* {timestamp}\n"
+            f"----------------------------------"
         )
 
         message = client.messages.create(
@@ -31,108 +38,100 @@ def send_whatsapp_notification(name, mobile, category, description):
     except Exception as e:
         return False, str(e)
 
-# --- STREAMLIT UI (ARABIC & RTL SUPPORT with Branding) ---
-st.set_page_config(page_title="نظام الدعم الفني - عزاز البنا", page_icon="🏗️")
+# --- STREAMLIT UI (ARABIC & AZAZ BRANDING) ---
+st.set_page_config(page_title="عزاز البناء - نظام الدعم", page_icon="🏗️")
 
-# Custom CSS for RTL, Saudi Green Theme, and Fonts
+# RTL CSS and Custom Saudi Red/Black Theme from Logo
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     
     html, body, [class*="st-"] {
         font-family: 'Cairo', sans-serif;
+        direction: RTL;
+        text-align: right;
     }
     
-    .reportview-container .main .block-container {
-        direction: RTL;
-        text-align: right;
-        max-width: 750px; # Adjust as needed
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-        padding-left: 1rem;
-        padding-right: 1rem;
+    .stApp {
+        background-color: #ffffff;
     }
-    input, textarea, select, .stTextInput, .stTextArea, .stSelectbox {
+
+    /* Main Container */
+    .block-container {
+        padding-top: 2rem;
+    }
+
+    /* Input Fields Styling */
+    input, textarea, select {
         direction: RTL !important;
         text-align: right !important;
-        border-color: #004F2D; /* Saudi Green border */
+        border: 1px solid #e0e0e0 !important;
     }
-    label {
-        color: #004F2D; /* Saudi Green labels */
-        text-align: right;
-        width: 100%;
-    }
+
+    /* Submit Button Styling (Red like the logo) */
     .stButton > button {
-        background-color: #004F2D; /* Saudi Green button */
+        background-color: #e31e24; /* Red from logo */
         color: white;
-        border-radius: 5px;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        font-size: 1.1rem;
-        direction: RTL;
-        text-align: center;
+        font-weight: bold;
         width: 100%;
+        border-radius: 8px;
+        padding: 0.5rem;
     }
+    
     .stButton > button:hover {
-        background-color: #006F3D; /* Darker Green on hover */
-        color: #FFFFFF;
+        background-color: #b31419;
+        color: white;
     }
-    .stSuccess, .stError, .stWarning {
-        direction: RTL;
-        text-align: right;
-    }
-    h1, h2, h3, h4, h5, h6 {
-        color: #004F2D; /* Headings in Saudi Green */
-        text-align: right;
-    }
-    .css-1faytmc { /* Streamlit header div for alignment */
-        flex-direction: row-reverse;
-        justify-content: flex-start;
-    }
-    .stMarkdown p {
-        text-align: right;
+
+    h1 {
+        color: #000000;
+        border-bottom: 2px solid #e31e24;
+        padding-bottom: 10px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Branding and Company Name ---
-st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Flag_of_Saudi_Arabia.svg/1200px-Flag_of_Saudi_Arabia.svg.png", width=100) # Saudi Flag for theme
-st.title("🌟 نظام الدعم والشكاوى لـ *عزاز البنا للخرسانة الجاهزة*")
-st.markdown("---")
-st.subheader("نتواجد لخدمتكم، يرجى ملء النموذج أدناه.")
+# --- Header Section with Logo ---
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    # Make sure logo_azaz.jpg is in your GitHub main folder
+    if os.path.exists("logo_azaz.jpg"):
+        st.image("logo_azaz.jpg", use_container_width=True)
+    else:
+        # Fallback if image not found
+        st.subheader("مصنع عزاز البناء للخرسانة الجاهزة")
 
-with st.form("complaint_form", clear_on_submit=True):
-    col1, col2 = st.columns(2)
+st.markdown("<h1 style='text-align: center;'>نظام الشكاوى والدعم الفني</h1>", unsafe_allow_html=True)
+st.write("")
+
+# --- Form Section ---
+with st.form("azaz_support_form", clear_on_submit=True):
+    name = st.text_input("الاسم الكامل*", placeholder="أدخل اسمك هنا")
+    mobile = st.text_input("رقم الجوال*", placeholder="05xxxxxxxx")
     
-    with col1:
-        name = st.text_input("الاسم الكامل*")
-    with col2:
-        mobile = st.text_input("رقم الجوال* (مثال: 05xxxxxxx)", placeholder="05xxxxxxxx")
-        
     category = st.selectbox(
         "نوع الطلب*",
-        ["دعم فني (Support)", "شكوى (Complaint)", "استفسار (Query)", "أخرى (Other)"]
+        ["دعم فني", "شكوى على جودة الخرسانة", "استفسار عن طلبية", "أخرى"]
     )
     
-    description = st.text_area("وصف المشكلة بالتفصيل*", help="يرجى تقديم أكبر قدر ممكن من التفاصيل لخدمتكم بشكل أفضل.")
+    description = st.text_area("تفاصيل المشكلة*", placeholder="يرجى كتابة التفاصيل هنا...")
     
-    submit_button = st.form_submit_button("إرسال الطلب")
+    submit_button = st.form_submit_button("إرسال الآن عبر واتساب")
 
     if submit_button:
         if not name or not mobile or not description:
-            st.error("❌ يرجى تعبئة جميع الحقول المطلوبة.")
-        elif not (mobile.startswith(('05')) and len(mobile) == 10) and not (mobile.startswith(('+9665')) and len(mobile) == 13):
-            st.warning("⚠️ يرجى التأكد من صحة رقم الجوال السعودي (مثال: 05xxxxxxx أو +9665xxxxxxx).")
+            st.error("⚠️ يرجى تعبئة جميع الحقول المطلوبة.")
+        elif not (len(mobile) >= 9):
+            st.warning("⚠️ رقم الجوال غير صحيح.")
         else:
-            with st.spinner("⏳ جاري إرسال طلبكم، يرجى الانتظار..."):
+            with st.spinner("جاري معالجة طلبك..."):
                 success, result = send_whatsapp_notification(name, mobile, category, description)
                 
                 if success:
-                    st.success(f"✅ تم إرسال طلبكم بنجاح، {name} ! شكرًا لتواصلكم مع عزاز البنا.")
+                    st.success(f"✅ تم استلام طلبك يا {name}. سيقوم فريق عزاز البناء بالتواصل معك قريباً.")
                     st.balloons()
                 else:
-                    st.error(f"🚫 خطأ في الإرسال: {result}. يرجى المحاولة لاحقاً أو التواصل معنا مباشرةً.")
+                    st.error(f"❌ حدث خطأ: {result}")
 
 st.markdown("---")
-# Saudi Vision 2030 reference
-st.caption("✨ متوافق مع رؤية المملكة 2030 - عزاز البنا للخرسانة الجاهزة ©")
+st.markdown("<p style='text-align: center; color: gray;'>حقوق الطبع والنشر © 2026 مصنع عزاز البناء للخرسانة الجاهزة</p>", unsafe_allow_html=True)
