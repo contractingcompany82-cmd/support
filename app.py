@@ -34,38 +34,29 @@ def send_whatsapp_notification(name, mobile, category, description):
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="عزاز البناء - نظام الدعم", page_icon="🏗️", layout="centered")
 
-# Sabse Solid CSS for RTL and UI Fix
+# Solid CSS for RTL and UI Fix
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     
-    /* Force RTL for the whole app */
     .main, .stApp {
         direction: RTL;
         text-align: right;
         font-family: 'Cairo', sans-serif;
     }
-
-    /* Fix for white background and spacing */
     .block-container {
         padding-top: 2rem !important;
-        background-color: #f9f9f9; /* Light grey background for contrast */
+        background-color: #f9f9f9;
         border-radius: 15px;
     }
-
-    /* Red Titles and Buttons */
     h1, h2, h3 {
         color: #e31e24 !important;
         text-align: center !important;
     }
-
-    /* Inputs alignment */
     input, textarea, select {
         text-align: right !important;
         direction: RTL !important;
     }
-
-    /* Button Styling */
     div.stButton > button {
         background-color: #e31e24 !important;
         color: white !important;
@@ -75,8 +66,6 @@ st.markdown("""
         font-size: 1.2rem !important;
         font-weight: bold !important;
     }
-    
-    /* Label styling */
     .stMarkdown p, label {
         text-align: right !important;
         font-weight: bold !important;
@@ -85,16 +74,18 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- Logo Display ---
-if os.path.exists("logo_azaz.jpg"):
-    st.image("logo_azaz.jpg", width=250) # Centered automatically by container
-else:
-    st.markdown("### مصنع عزاز البناء للخرسانة الجاهزة")
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if os.path.exists("logo_azaz.jpg"):
+        st.image("logo_azaz.jpg", use_container_width=True)
+    else:
+        st.markdown("### مصنع عزاز البناء")
 
-st.markdown("<h1>نظام تقديم البلاغات والشكاوى</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>نظام تقديم البلاغات والشكاوى</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'>يرجى تعبئة البيانات التالية وسنقوم بالتواصل معكم فوراً</p>", unsafe_allow_html=True)
 
 # --- Form ---
-with st.form("support_form"):
+with st.form("support_form", clear_on_submit=True):
     name = st.text_input("اسم العميل أو الشركة*")
     mobile = st.text_input("رقم الجوال السعودي*")
     
@@ -120,4 +111,5 @@ with st.form("support_form"):
                     st.error(f"❌ حدث خطأ في النظام: {msg}")
 
 st.markdown("---")
-st.markdown("<p
+# Fixed potential syntax error line below
+st.markdown("<p style='text-align: center; font-size: 0.8rem;'>نظام آلي مخصص لمصنع عزاز البناء - 2026</p>", unsafe_allow_html=True)
