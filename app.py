@@ -6,17 +6,14 @@ import os
 # --- CONFIGURATION & WHATSAPP LOGIC ---
 def send_whatsapp_notification(name, mobile, category, description):
     try:
-        # Fetching secrets
         account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
         auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
         from_whatsapp = st.secrets["TWILIO_WHATSAPP_FROM"]
         to_whatsapp = st.secrets["MY_WHATSAPP_NUMBER"]
 
         client = Client(account_sid, auth_token)
-        
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Professional WhatsApp Message Body
         message_body = (
             f"🏗️ *مصنع عزاز البناء للخرسانة الجاهزة*\n"
             f"----------------------------------\n"
@@ -29,109 +26,98 @@ def send_whatsapp_notification(name, mobile, category, description):
             f"----------------------------------"
         )
 
-        message = client.messages.create(
-            body=message_body,
-            from_=from_whatsapp,
-            to=to_whatsapp
-        )
+        message = client.messages.create(body=message_body, from_=from_whatsapp, to=to_whatsapp)
         return True, message.sid
     except Exception as e:
         return False, str(e)
 
-# --- STREAMLIT UI (ARABIC & AZAZ BRANDING) ---
-st.set_page_config(page_title="عزاز البناء - نظام الدعم", page_icon="🏗️")
+# --- STREAMLIT UI ---
+st.set_page_config(page_title="عزاز البناء - نظام الدعم", page_icon="🏗️", layout="centered")
 
-# RTL CSS and Custom Saudi Red/Black Theme from Logo
+# Sabse Solid CSS for RTL and UI Fix
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     
-    html, body, [class*="st-"] {
-        font-family: 'Cairo', sans-serif;
+    /* Force RTL for the whole app */
+    .main, .stApp {
         direction: RTL;
         text-align: right;
-    }
-    
-    .stApp {
-        background-color: #ffffff;
+        font-family: 'Cairo', sans-serif;
     }
 
-    /* Main Container */
+    /* Fix for white background and spacing */
     .block-container {
-        padding-top: 2rem;
+        padding-top: 2rem !important;
+        background-color: #f9f9f9; /* Light grey background for contrast */
+        border-radius: 15px;
     }
 
-    /* Input Fields Styling */
+    /* Red Titles and Buttons */
+    h1, h2, h3 {
+        color: #e31e24 !important;
+        text-align: center !important;
+    }
+
+    /* Inputs alignment */
     input, textarea, select {
-        direction: RTL !important;
         text-align: right !important;
-        border: 1px solid #e0e0e0 !important;
+        direction: RTL !important;
     }
 
-    /* Submit Button Styling (Red like the logo) */
-    .stButton > button {
-        background-color: #e31e24; /* Red from logo */
-        color: white;
-        font-weight: bold;
-        width: 100%;
-        border-radius: 8px;
-        padding: 0.5rem;
+    /* Button Styling */
+    div.stButton > button {
+        background-color: #e31e24 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        height: 3em !important;
+        width: 100% !important;
+        font-size: 1.2rem !important;
+        font-weight: bold !important;
     }
     
-    .stButton > button:hover {
-        background-color: #b31419;
-        color: white;
-    }
-
-    h1 {
-        color: #000000;
-        border-bottom: 2px solid #e31e24;
-        padding-bottom: 10px;
+    /* Label styling */
+    .stMarkdown p, label {
+        text-align: right !important;
+        font-weight: bold !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- Header Section with Logo ---
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    # Make sure logo_azaz.jpg is in your GitHub main folder
-    if os.path.exists("logo_azaz.jpg"):
-        st.image("logo_azaz.jpg", use_container_width=True)
-    else:
-        # Fallback if image not found
-        st.subheader("مصنع عزاز البناء للخرسانة الجاهزة")
+# --- Logo Display ---
+if os.path.exists("logo_azaz.jpg"):
+    st.image("logo_azaz.jpg", width=250) # Centered automatically by container
+else:
+    st.markdown("### مصنع عزاز البناء للخرسانة الجاهزة")
 
-st.markdown("<h1 style='text-align: center;'>نظام الشكاوى والدعم الفني</h1>", unsafe_allow_html=True)
-st.write("")
+st.markdown("<h1>نظام تقديم البلاغات والشكاوى</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>يرجى تعبئة البيانات التالية وسنقوم بالتواصل معكم فوراً</p>", unsafe_allow_html=True)
 
-# --- Form Section ---
-with st.form("azaz_support_form", clear_on_submit=True):
-    name = st.text_input("الاسم الكامل*", placeholder="أدخل اسمك هنا")
-    mobile = st.text_input("رقم الجوال*", placeholder="05xxxxxxxx")
+# --- Form ---
+with st.form("support_form"):
+    name = st.text_input("اسم العميل أو الشركة*")
+    mobile = st.text_input("رقم الجوال السعودي*")
     
     category = st.selectbox(
-        "نوع الطلب*",
-        ["دعم فني", "شكوى على جودة الخرسانة", "استفسار عن طلبية", "أخرى"]
+        "نوع البلاغ*",
+        ["شكوى جودة خرسانة", "تأخير توريد", "طلب دعم فني", "استفسار مالي", "أخرى"]
     )
     
-    description = st.text_area("تفاصيل المشكلة*", placeholder="يرجى كتابة التفاصيل هنا...")
+    description = st.text_area("تفاصيل البلاغ*", height=150)
     
-    submit_button = st.form_submit_button("إرسال الآن عبر واتساب")
+    submit = st.form_submit_button("إرسال البلاغ الآن")
 
-    if submit_button:
+    if submit:
         if not name or not mobile or not description:
-            st.error("⚠️ يرجى تعبئة جميع الحقول المطلوبة.")
-        elif not (len(mobile) >= 9):
-            st.warning("⚠️ رقم الجوال غير صحيح.")
+            st.error("⚠️ يرجى تعبئة جميع الخانات المطلوبة")
         else:
-            with st.spinner("جاري معالجة طلبك..."):
-                success, result = send_whatsapp_notification(name, mobile, category, description)
-                
+            with st.spinner("جاري إرسال البيانات..."):
+                success, msg = send_whatsapp_notification(name, mobile, category, description)
                 if success:
-                    st.success(f"✅ تم استلام طلبك يا {name}. سيقوم فريق عزاز البناء بالتواصل معك قريباً.")
+                    st.success("✅ تم الإرسال بنجاح! شكراً لتعاونكم مع عزاز البناء.")
                     st.balloons()
                 else:
-                    st.error(f"❌ حدث خطأ: {result}")
+                    st.error(f"❌ حدث خطأ في النظام: {msg}")
 
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>حقوق الطبع والنشر © 2026 مصنع عزاز البناء للخرسانة الجاهزة</p>", unsafe_allow_html=True)
+st.markdown("<p
