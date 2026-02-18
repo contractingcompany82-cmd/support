@@ -5,10 +5,10 @@ from datetime import datetime
 # --- CONFIGURATION & WHATSAPP LOGIC ---
 def send_whatsapp_notification(name, mobile, category, description):
     # Fetch credentials from Streamlit Secrets
-    account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
-    auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
-    from_whatsapp = st.secrets["TWILIO_WHATSAPP_FROM"]  # e.g., 'whatsapp:+14155238886'
-    to_whatsapp = st.secrets["MY_WHATSAPP_NUMBER"]      # e.g., 'whatsapp:+911234567890'
+    account_sid = st.secrets["ACed69b33546757121abd0fe5d9f9455b5"]
+    auth_token = st.secrets["854aac2c8b57dbf945babd600c885bf8"]
+    from_whatsapp = st.secrets["whatsapp:+14155238886"]  # e.g., 'whatsapp:+14155238886'
+    to_whatsapp = st.secrets["whatsapp:+966544221519"]      # e.g., 'whatsapp:+911234567890'
 
     client = Client(account_sid, auth_token)
     
