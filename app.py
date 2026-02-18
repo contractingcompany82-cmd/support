@@ -4,26 +4,27 @@ from datetime import datetime
 
 # --- CONFIGURATION & WHATSAPP LOGIC ---
 def send_whatsapp_notification(name, mobile, category, description):
-    # Fetch credentials from Streamlit Secrets
-    account_sid = st.secrets["ACed69b33546757121abd0fe5d9f9455b5"]
-    auth_token = st.secrets["854aac2c8b57dbf945babd600c885bf8"]
-    from_whatsapp = st.secrets["whatsapp:+14155238886"]  # e.g., 'whatsapp:+14155238886'
-    to_whatsapp = st.secrets["whatsapp:+966544221519"]      # e.g., 'whatsapp:+911234567890'
-
-    client = Client(account_sid, auth_token)
-    
-    # Format the message
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    message_body = (
-        f"🚨 *New Support Ticket*\n\n"
-        f"*Name:* {name}\n"
-        f"*Mobile:* {mobile}\n"
-        f"*Type:* {category}\n"
-        f"*Description:* {description}\n\n"
-        f"*Time:* {timestamp}"
-    )
-
+    # SAHI TARIKA: Yahan hum "Variable Names" use kar rahe hain, direct keys nahi.
+    # Ye values aapke Streamlit Cloud ke 'Secrets' section se uthayi jayengi.
     try:
+        account_sid = st.secrets["TWILIO_ACCOUNT_SID"]
+        auth_token = st.secrets["TWILIO_AUTH_TOKEN"]
+        from_whatsapp = st.secrets["TWILIO_WHATSAPP_FROM"]
+        to_whatsapp = st.secrets["MY_WHATSAPP_NUMBER"]
+
+        client = Client(account_sid, auth_token)
+        
+        # Format the message
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        message_body = (
+            f"🚨 *New Support Ticket*\n\n"
+            f"*Name:* {name}\n"
+            f"*Mobile:* {mobile}\n"
+            f"*Type:* {category}\n"
+            f"*Description:* {description}\n\n"
+            f"*Time:* {timestamp}"
+        )
+
         message = client.messages.create(
             body=message_body,
             from_=from_whatsapp,
@@ -57,17 +58,15 @@ with st.form("complaint_form", clear_on_submit=True):
     submit_button = st.form_submit_button("Submit Ticket")
 
     if submit_button:
-        # --- VALIDATION ---
         if not name or not mobile or not description:
             st.error("Please fill in all required fields.")
-        elif len(mobile) < 10:
-            st.error("Please enter a valid mobile number.")
         else:
-            with st.spinner("Sending ticket to support team..."):
+            with st.spinner("Processing..."):
                 success, result = send_whatsapp_notification(name, mobile, category, description)
                 
                 if success:
-                    st.success(f"Thank you, {name}! Your ticket has been submitted and sent to our team.")
+                    st.success(f"Ticket submitted successfully!")
                     st.balloons()
                 else:
-                    st.error(f"Error sending WhatsApp notification: {result}")
+                    # Agar error aata hai toh yahan dikhayega
+                    st.error(f"Error: {result}")
