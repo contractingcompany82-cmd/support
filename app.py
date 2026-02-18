@@ -1,9 +1,8 @@
 import streamlit as st
 from twilio.rest import Client
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 import os
-import requests
-from io import BytesIO
+from datetime import timezone, timedelta
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -16,7 +15,7 @@ st.set_page_config(
 # --- CUSTOM CSS FOR SAUDI/ARABIC STYLING ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&family=Tajawal:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap');
     
     .main {
         direction: rtl;
@@ -41,27 +40,23 @@ st.markdown("""
     }
     
     .arabic-text-inline {
-        color: #c41e3a;
-        font-weight: 700;
-        font-family: 'Tajawal', sans-serif;
+        color: #1e88e5;
+        font-weight: 600;
+        font-family: 'Noto Naskh Arabic', serif;
     }
     
     .stButton>button {
-        background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+        background-color: #1e88e5;
         color: white;
         font-weight: bold;
         border-radius: 8px;
         padding: 12px 24px;
         width: 100%;
         font-size: 16px;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     
     .stButton>button:hover {
-        background: linear-gradient(135deg, #8b0000 0%, #c41e3a 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        background-color: #1565c0;
     }
     
     .success-message {
@@ -72,7 +67,6 @@ st.markdown("""
         border-right: 5px solid #28a745;
         direction: rtl;
         text-align: right;
-        font-family: 'Tajawal', sans-serif;
     }
     
     .error-message {
@@ -83,16 +77,26 @@ st.markdown("""
         border-right: 5px solid #dc3545;
         direction: rtl;
         text-align: right;
-        font-family: 'Tajawal', sans-serif;
     }
     
-    .logo-container {
+    .header-container {
         text-align: center;
         padding: 20px;
-        background: white;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 12px;
         margin-bottom: 30px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        color: white;
+    }
+    
+    .logo-text {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .logo-subtext {
+        font-size: 1.2rem;
+        opacity: 0.9;
     }
     
     .form-container {
@@ -100,15 +104,12 @@ st.markdown("""
         padding: 30px;
         border-radius: 12px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        border-top: 4px solid #c41e3a;
     }
     
-    .header-title {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border-radius: 12px;
+    /* Saudi Flag Colors Accent */
+    .saudi-accent {
+        border-top: 4px solid #006C35;
+        border-bottom: 4px solid #006C35;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -118,32 +119,6 @@ def get_saudi_time():
     """Get current time in Saudi Arabia (UTC+3)"""
     saudi_tz = timezone(timedelta(hours=3))
     return datetime.now(saudi_tz)
-
-# --- LOGO DISPLAY FUNCTION ---
-def display_logo():
-    """Display logo from GitHub or local file"""
-    try:
-        # Try GitHub raw URL first (replace with your actual GitHub raw URL)
-        # Example: https://raw.githubusercontent.com/username/repo/main/logo%20azaz.jpg
-        github_url = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/logo%20azaz.jpg"
-        
-        response = requests.get(github_url, timeout=5)
-        if response.status_code == 200:
-            logo_image = BytesIO(response.content)
-            st.image(logo_image, use_column_width=True)
-            return True
-    except:
-        pass
-    
-    # Fallback to local file
-    if os.path.exists("logo azaz.jpg"):
-        st.image("logo azaz.jpg", use_column_width=True)
-        return True
-    elif os.path.exists("logo_azaz.jpg"):
-        st.image("logo_azaz.jpg", use_column_width=True)
-        return True
-    
-    return False
 
 # --- WHATSAPP LOGIC ---
 def send_whatsapp_notification(name, mobile, category, description):
@@ -156,15 +131,15 @@ def send_whatsapp_notification(name, mobile, category, description):
         client = Client(account_sid, auth_token)
         timestamp = get_saudi_time().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Bilingual message with logo reference
+        # Bilingual message
         message_body = (
-            f"🏗️ *Azaz AlBena Ready Mix* | *مصنع عزاز البناء*\n"
+            f"🏗️ *Azaz AlBena Ready Mix* | *ازاز البناء للخرسانة الجاهزة*\n"
             f"New Support Ticket | تذكرة دعم جديدة\n\n"
             f"*Name | الاسم:* {name}\n"
             f"*Mobile | الجوال:* {mobile}\n"
             f"*Type | النوع:* {category}\n"
             f"*Description | الوصف:* {description}\n\n"
-            f"*Time | الوقت:* {timestamp} 🇸🇦"
+            f"*Time | الوقت:* {timestamp} (Saudi Arabia | السعودية)"
         )
 
         client.messages.create(body=message_body, from_=from_whatsapp, to=to_whatsapp)
@@ -176,31 +151,29 @@ def send_whatsapp_notification(name, mobile, category, description):
 col1, col2, col3 = st.columns([1, 3, 1])
 
 with col2:
-    st.markdown('<div class="logo-container">', unsafe_allow_html=True)
-    
-    # Display logo
-    logo_displayed = display_logo()
-    
-    if not logo_displayed:
-        # Fallback text logo with company colors (red from logo)
+    # Try to load logo, fallback to styled text
+    if os.path.exists("logo_azaz.jpg"):
+        st.image("logo_azaz.jpg", use_column_width=True)
+    else:
+        # Styled text logo with Saudi colors
         st.markdown("""
-            <div style="text-align: center; color: #c41e3a;">
-                <h1 style="font-size: 3rem; margin: 0; font-weight: bold;">🏗️ Azaz AlBena</h1>
-                <h2 style="font-size: 1.5rem; margin: 5px 0; color: #333;">مصنع عزاز البناء</h2>
-                <p style="color: #666; font-size: 1rem;">للخرسانة الجاهزة | Ready Mix Concrete</p>
+            <div class="header-container saudi-accent">
+                <div class="logo-text">🏗️ Azaz AlBena</div>
+                <div class="logo-subtext">ازاز البناء للخرسانة الجاهزة</div>
+                <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">
+                    Ready Mix Concrete | مورد خرسانة جاهزة
+                </div>
             </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- MAIN HEADING ---
 st.markdown("""
-    <div class="header-title">
-        <h2 style="color: #c41e3a; margin-bottom: 10px; font-family: 'Tajawal', sans-serif;">
-            <span class="english-text">Customer Support System</span> | 
-            <span class="arabic-text-inline">نظام دعم العملاء</span>
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: #2c3e50; margin-bottom: 10px;">
+            <span class="english-text">Support System</span> | 
+            <span class="arabic-text-inline">نظام الدعم</span>
         </h2>
-        <p style="color: #555; font-size: 1.1rem; font-family: 'Tajawal', sans-serif;">
+        <p style="color: #666; font-size: 1.1rem;">
             Please fill out the form below | يرجى ملء النموذج أدناه
         </p>
     </div>
@@ -215,7 +188,7 @@ with st.container():
         # Full Name - Bilingual
         st.markdown("""
             <div class="bilingual-label">
-                <span class="english-text">Full Name *</span>
+                <span class="english-text">Full Name</span>
                 <span class="arabic-text-inline">الاسم الكامل *</span>
             </div>
         """, unsafe_allow_html=True)
@@ -224,7 +197,7 @@ with st.container():
         # Mobile Number - Saudi Format
         st.markdown("""
             <div class="bilingual-label">
-                <span class="english-text">Mobile Number *</span>
+                <span class="english-text">Mobile Number</span>
                 <span class="arabic-text-inline">رقم الجوال *</span>
             </div>
         """, unsafe_allow_html=True)
@@ -233,15 +206,15 @@ with st.container():
         # Category - Bilingual options
         st.markdown("""
             <div class="bilingual-label">
-                <span class="english-text">Request Type *</span>
+                <span class="english-text">Request Type</span>
                 <span class="arabic-text-inline">نوع الطلب *</span>
             </div>
         """, unsafe_allow_html=True)
         
         category_options = {
-            "Technical Support | دعم فني": "Support",
+            "Support | دعم فني": "Support",
             "Complaint | شكوى": "Complaint", 
-            "Inquiry | استفسار": "Query",
+            "Query | استفسار": "Query",
             "Order Request | طلب توريد": "Order",
             "Other | أخرى": "Other"
         }
@@ -252,15 +225,15 @@ with st.container():
         # Description
         st.markdown("""
             <div class="bilingual-label">
-                <span class="english-text">Description *</span>
+                <span class="english-text">Description</span>
                 <span class="arabic-text-inline">الوصف بالتفصيل *</span>
             </div>
         """, unsafe_allow_html=True)
         description = st.text_area("", key="desc", height=120, 
-                                   placeholder="Describe your issue here... | اصف مشكلتك هنا بالتفصيل...")
+                                   placeholder="Describe your issue here... | اصف مشكلتك هنا...")
         
         # Submit Button - Bilingual
-        submit_button = st.form_submit_button("🚀 Submit Request | إرسال الطلب")
+        submit_button = st.form_submit_button("🚀 Submit | إرسال الطلب")
         
         if submit_button:
             # Validation
@@ -274,7 +247,7 @@ with st.container():
                 st.markdown("""
                     <div class="error-message">
                         ⚠️ Please enter valid Saudi mobile number (05xxxxxxxx) | 
-                        يرجى إدخال رقم جوال سعودي صحيح (مثال: 0551234567)
+                        يرجى إدخال رقم جوال سعودي صحيح
                     </div>
                 """, unsafe_allow_html=True)
             else:
@@ -284,7 +257,7 @@ with st.container():
                         st.markdown("""
                             <div class="success-message">
                                 ✅ <strong>Submitted Successfully!</strong> | <strong>تم الإرسال بنجاح!</strong><br>
-                                We will contact you soon on your mobile | سنتواصل معك قريباً على جوالك
+                                We will contact you soon | سنتواصل معك قريباً
                             </div>
                         """, unsafe_allow_html=True)
                         st.balloons()
@@ -296,13 +269,13 @@ with st.container():
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("""
-    <div style="text-align: center; color: #666; padding: 20px; direction: rtl; font-family: 'Tajawal', sans-serif;">
-        <p style="font-size: 1.1rem; color: #c41e3a; font-weight: bold;">
-            🏗️ Azaz AlBena Ready Mix | مصنع عزاز البناء للخرسانة الجاهزة
+    <div style="text-align: center; color: #666; padding: 20px; direction: rtl;">
+        <p>
+            <strong>Azaz AlBena Ready Mix</strong> | 
+            <strong>ازاز البناء للخرسانة الجاهزة</strong>
         </p>
-        <p style="font-size: 0.9rem; color: #555;">
-            📍 Kingdom of Saudi Arabia | المملكة العربية السعودية<br>
-            📞 Customer Service | خدمة العملاء: 9200XXXXX<br>
+        <p style="font-size: 0.9rem;">
+            📍 Saudi Arabia | المملكة العربية السعودية<br>
             © 2026 All Rights Reserved | جميع الحقوق محفوظة
         </p>
     </div>
